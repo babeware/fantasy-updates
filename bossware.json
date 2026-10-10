@@ -1,8 +1,8 @@
 
 {
   "appId": "bossware",
-  "version": "1.4.5",
+  "version": "1.4.4",
   "notes": "BABEWARE verified download and recovery test.",
-  "url": "https://github.com/babeware/fantasy-updates/releases/download/bossware-v1.4.4-test/BOSSWARE_v1.4.4_TEST_RELEASE.zip",
-  "sha256": "91DC3F493553E36AA2B542D27A9B8B03F4162D4C2690388757411893C77FE7A8"
+  "url": "https://github.com/babeware/fantasy-updates/releases/download/bossware-v1.4.4-test/BOSSWARE_v1.4.4_SAFE_TEST_RELEASE.zip",
+  "sha256": "7646E18B20F077A71CB4F8FEEC37666DC038FBB54DFE9E881FDBC39B9D09C6B4"
 }
