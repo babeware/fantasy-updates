@@ -1,8 +1,8 @@
 
 {
   "appId": "bossware",
-  "version": "1.4.6",
-  "notes": "Testing BABEWARE again.",
-  "url": "https://github.com/babeware/fantasy-updates",
-  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  "version": "1.4.4",
+  "notes": "BABEWARE verified download and recovery test.",
+  "url": "PASTE_YOUR_GITHUB_RELEASE_ZIP_URL_HERE",
+  "sha256": "91dc3f493553e36aa2b542d27a9b8b03f4162d4c2690388757411893c77fe7a8"
 }
