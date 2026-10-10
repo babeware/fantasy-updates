@@ -2,7 +2,7 @@
 {
   "appId": "bossware",
   "version": "1.4.4",
-  "notes": "Initial BABEWARE update system setup.",
+  "notes": "Testing BABEWARE in-app update notifications.",
   "url": "https://github.com/babeware/fantasy-updates",
   "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
 }
