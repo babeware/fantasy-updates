@@ -1,8 +1,8 @@
 
 {
   "appId": "bossware",
-  "version": "1.4.4",
-  "notes": "BABEWARE verified download and recovery test.",
-  "url": "https://github.com/babeware/fantasy-updates/releases/download/bossware-v1.4.4-test/BOSSWARE_v1.4.4_SAFE_TEST_RELEASE.zip",
-  "sha256": "7646E18B20F077A71CB4F8FEEC37666DC038FBB54DFE9E881FDBC39B9D09C6B4"
+  "version": "1.4.5",
+  "url": "https://github.com/babeware/fantasy-updates/releases/download/v1.4.5/BOSSWARE_v1.4.5_RELEASE_CANDIDATE.zip",
+  "sha256": "1E6B00E760711AE206A3BCC02369C33A2AC1C7FF07DA2A17E23DDEF53C6AE97E",
+  "notes": "Clock-out fix for newly created businesses; preserves BABEWARE verified updater and rollback."
 }
