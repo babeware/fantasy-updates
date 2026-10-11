@@ -1,8 +1,6 @@
-
 {
   "appId": "bossware",
-  "version": "1.4.5",
-  "url": "https://github.com/babeware/fantasy-updates/releases/download/v1.4.5/BOSSWARE_v1.4.5_RELEASE_CANDIDATE.zip",
-  "sha256": "1E6B00E760711AE206A3BCC02369C33A2AC1C7FF07DA2A17E23DDEF53C6AE97E",
-  "notes": "Clock-out fix for newly created businesses; preserves BABEWARE verified updater and rollback."
+  "version": "1.5.5",
+  "url": "https://github.com/babeware/fantasy-updates/releases/download/v1.5.5/BOSSWARE_v1.5.5_GITHUB_UPDATE.zip",
+  "sha256": "287571944B0528F85B8C586FADFCD48F04DA3D9B5B1FF01AEF3DE26FD74AEB73"
 }
