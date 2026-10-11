@@ -1,0 +1,7 @@
+{
+  "appId": "bossware",
+  "version": "1.5.5",
+  "url": "https://github.com/babeware/fantasy-updates/releases/download/qa-v1.5.5/BOSSWARE_QA_UPDATE_v1.5.5.zip",
+  "sha256": "33D74297D6BE0A2CE83131E403FEE71911C65A64421169B885B68589967EB533",
+  "notes": "Isolated QA release only. Do not use for production."
+}
