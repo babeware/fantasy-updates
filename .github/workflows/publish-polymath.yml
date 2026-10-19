@@ -1,0 +1,98 @@
+
+name: Publish POLYMATH Manifest
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "POLYMATH release tag (e.g. polymath-v1.1.1)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: polymath-manifest
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'polymath-v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Generate verified POLYMATH manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import re
+          import subprocess
+
+          tag = os.environ["RELEASE_TAG"]
+          repo = os.environ["REPO"]
+
+          match = re.fullmatch(
+              r"polymath-v(\d+\.\d+\.\d+)", tag
+          )
+          if not match:
+              raise SystemExit("Invalid POLYMATH release tag")
+
+          version = match.group(1)
+          filename = f"POLYMATH_Setup_v{version}_CONSUMER.exe"
+
+          subprocess.run([
+              "gh", "release", "download", tag,
+              "--repo", repo,
+              "--pattern", filename,
+              "--dir", "/tmp"
+          ], check=True)
+
+          installer = pathlib.Path("/tmp") / filename
+          if not installer.is_file():
+              raise SystemExit("Installer asset not found")
+
+          sha256 = hashlib.sha256(
+              installer.read_bytes()
+          ).hexdigest()
+
+          manifest = {
+              "version": version,
+              "installer_url": (
+                  f"https://github.com/{repo}/releases/"
+                  f"download/{tag}/{filename}"
+              ),
+              "sha256": sha256
+          }
+
+          pathlib.Path("polymath.json").write_text(
+              json.dumps(manifest, indent=2) + "\n",
+              encoding="utf-8"
+          )
+
+          print(f"Generated POLYMATH {version} manifest")
+          PY
+
+      - name: Commit manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add polymath.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update POLYMATH release manifest"
+            git push origin HEAD:main
+          fi
