@@ -1,0 +1,122 @@
+
+name: Publish XXXECUTIVE Manifest
+
+on:
+  release:
+    types: [published]
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "XXXECUTIVE release tag"
+        required: true
+        default: "xxxecutive-v1.0.1"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: xxxecutive-manifest
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'xxxecutive-v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Generate verified manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import re
+          import subprocess
+
+          tag = os.environ["RELEASE_TAG"].strip()
+          repo = os.environ["REPO"]
+
+          print(f"Release tag: {tag!r}", flush=True)
+
+          match = re.fullmatch(
+              r"xxxecutive-v(\d+\.\d+\.\d+)",
+              tag
+          )
+
+          if not match:
+              raise SystemExit(
+                  f"Invalid release tag: {tag!r}. "
+                  "Expected xxxecutive-v1.0.1"
+              )
+
+          version = match.group(1)
+          filename = f"XXXECUTIVE_Setup_v{version}_CONSUMER.exe"
+
+          subprocess.run([
+              "gh", "release", "view", tag,
+              "--repo", repo
+          ], check=True)
+
+          download_dir = pathlib.Path("/tmp/xxxecutive")
+          download_dir.mkdir(exist_ok=True)
+
+          subprocess.run([
+              "gh", "release", "download", tag,
+              "--repo", repo,
+              "--pattern", filename,
+              "--dir", str(download_dir)
+          ], check=True)
+
+          installer = download_dir / filename
+
+          if not installer.is_file():
+              raise SystemExit(
+                  f"Installer not found: {filename}"
+              )
+
+          sha256 = hashlib.sha256(
+              installer.read_bytes()
+          ).hexdigest()
+
+          manifest = {
+              "version": version,
+              "installer_url": (
+                  f"https://github.com/{repo}/releases/"
+                  f"download/{tag}/{filename}"
+              ),
+              "sha256": sha256
+          }
+
+          pathlib.Path("xxxecutive.json").write_text(
+              json.dumps(manifest, indent=2) + "\n",
+              encoding="utf-8"
+          )
+
+          print(json.dumps(manifest, indent=2))
+          PY
+
+      - name: Commit manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add xxxecutive.json
+
+          if git diff --cached --quiet; then
+            echo "Manifest already up to date."
+          else
+            git commit -m "Update XXXECUTIVE release manifest"
+            git push origin HEAD:main
+          fi
