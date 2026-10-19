@@ -1,6 +1,5 @@
-
 {
   "version": "1.1.1",
-  "installer_url": "",
-  "sha256": ""
+  "installer_url": "https://github.com/babeware/fantasy-updates/releases/download/polymath-v1.1.1/POLYMATH_Setup_v1.1.1_CONSUMER.exe",
+  "sha256": "8a89cdc299bb6c2f4c7a136553e2bad9c2d90238bd17640b245d0e3289d7e99c"
 }
