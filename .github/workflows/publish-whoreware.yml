@@ -1,0 +1,81 @@
+name: Publish WHOREWARE Manifest
+
+on:
+  release:
+    types: [published, edited]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish"
+        required: true
+        default: "whoreware-v1.0.14"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: whoreware-manifest
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'whoreware-v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Verify installer and write manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+        run: |
+          python3 - <<'PYTHON'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+
+          tag = os.environ['RELEASE_TAG'].strip()
+          repo = os.environ['REPO']
+          match = re.fullmatch(r'whoreware-v(\d+\.\d+\.\d+)', tag)
+          if not match:
+              raise SystemExit(f'Invalid tag: {tag!r}. Expected whoreware-vMAJOR.MINOR.PATCH')
+          version = match.group(1)
+          filename = f'WHOREWARE_Setup_v{version}_CONSUMER.exe'
+          subprocess.run(['gh','release','view',tag,'--repo',repo],check=True)
+          destination = Path('/tmp/whoreware-release')
+          destination.mkdir(exist_ok=True)
+          subprocess.run(['gh','release','download',tag,'--repo',repo,'--pattern',filename,'--dir',str(destination),'--clobber'],check=True)
+          installer = destination / filename
+          if not installer.is_file():
+              raise SystemExit(f'Release asset missing: {filename}')
+          h = hashlib.sha256()
+          with installer.open('rb') as stream:
+              for chunk in iter(lambda: stream.read(1024*1024), b''):
+                  h.update(chunk)
+          manifest = {
+              'version': version,
+              'installer_url': f'https://github.com/{repo}/releases/download/{tag}/{filename}',
+              'sha256': h.hexdigest(),
+          }
+          Path('whoreware.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(manifest,indent=2))
+          PYTHON
+      - name: Commit manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add whoreware.json
+          if git diff --cached --quiet; then
+            echo "Manifest already up to date."
+          else
+            git commit -m "Update WHOREWARE release manifest"
+            git push origin HEAD:main
+          fi
